@@ -1,57 +1,62 @@
 import dotenv from "dotenv";
+dotenv.config(); // load env variables first
+
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Routes
 import routes from "./src/route/route.js";
 import privroutes from "./src/route/PrivRoute.js";
 import userroutes from "./src/route/UserRoute.js";
 import orderroutes from "./src/route/OrderRoute.js";
 import mealroutes from "./src/route/MealRoute.js";
-import bodyParser from "body-parser";
+
 const app = express();
 
-//middleware
+// Set __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Middleware
 app.use(cors());
-app.use(express.json({limit: "50mb"}))
-app.use(express.urlencoded({limit: "50mb"}))
-//parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
-app.use("/uploads", express.static("uploads"));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb" }));
 
-//DB connection
+// Serve uploads correctly
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Body parser
+import bodyParser from "body-parser";
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// MongoDB connection
 mongoose.set("strictQuery", false);
 mongoose
-    .connect(
-        "mongodb+srv://davidbashorun:ADo01A6MVGgXPgrK@cluster0.80qqyft.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-    {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    }
-    )
-    .then(() => console.log("DB connected"))
-    .catch((err) => console.log("DB Connection Error", err));
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("DB connected"))
+  .catch((err) => console.log("DB Connection Error", err));
 
-dotenv.config()
+// Routes
+app.use("/api", routes);
+app.use("/api", userroutes);
+app.use("/api", orderroutes);
+app.use("/api", mealroutes);
+app.use("/api", privroutes);
 
-
-app.use(cors())
-
-const PORT = process.env.PORT || 4000;
-
+// Test route
 app.get("/", (req, res) => {
-    res.send("Hello there, you're running on this server");
-})
+  res.send("Hello there, you're running on this server");
+});
 
-app.use("/api" , routes)
-app.use("/api", userroutes)
-app.use("/api", orderroutes)
-app.use("/api", mealroutes)
-app.use("/api", privroutes)
-
-
+// PORT
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-})
-
+  console.log(`Server is running on port ${PORT}`);
+});

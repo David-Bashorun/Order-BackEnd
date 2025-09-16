@@ -1,48 +1,51 @@
 .:
+package.json
+Server.js
+src/
+structure.txt
+
+./src:
 config/
 controller/
 middleware/
 model/
-package.json
 package-lock.json
 README.md
 route/
-Server.js
-structure.txt
 uploads/
 utils/
 
-./config:
+./src/config:
 db.js
 
-./controller:
+./src/controller:
 mealController.js
 orderController.js
 userController.js
 
-./middleware:
+./src/middleware:
 authenticateToken.js
 errorHandlermiddleware.js
 
-./model:
+./src/model:
 meal.js
 order.js
 User.js
 
-./route:
+./src/route:
 MealRoute.js
 OrderRoute.js
 PrivRoute.js
 route.js
 UserRoute.js
 
-./uploads:
+./src/uploads:
 1754401695634-download.jpg
 1754402071019-1754401695634-download.jpg
 1754905484559-download.jpg
 1758020913340-download.jpg
 
-./utils:
+./src/utils:
 nodemailerConfig.js
 sendEmail.js
 sendResetPassword.js
