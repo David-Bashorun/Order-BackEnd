@@ -5,132 +5,150 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import e from "express";
 import { v4 as uuidv4 } from "uuid";
+import sendEmail from "../utils/sendEmail.js";
+import sendVerificationEmail from "../utils/sendVerificationEmail.js";
 
 
-export const signup = async (req,res) => {
-    try{
-        const {Name, email, password} = req.body;
-        console.log(Name, email, password);
-        //check if the email is already registered
+export const signup = async (req, res) => {
+  try {
+    const { Name, email, password } = req.body;
 
-        const extinguisher = await User.findOne({email});
-        if(extinguisher){
-            return res.status(400).json({message:"Email already registered"});
-        }
-        
-        //Hash the passsword
-        const hashedPassword = await bcrypt.hash(password,10);
-
-        //create a new user
-        const newUser = new User ({
-            userId: uuidv4(),
-            Name: Name,
-            email: email,
-            password: hashedPassword,
-        })
-
-
-        await newUser.save();
-
-        return res.status(201).json({message: "User registered ssuccesfully"})
-
-
-    }catch(error) {
-        console.log(error);
-        return res.status(500).json({message: "server error"})
-        
-
+    // check if email already exists
+    const extinguisher = await User.findOne({ email });
+    if (extinguisher) {
+      return res.status(400).json({ message: "Email already registered" });
     }
 
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-}
+    // create verification token
+    const verificationToken = uuidv4();
 
-// export const signin = async (req,res) => {
-//     try {
-//         const {email, password} = req.body;
-//         console.log(email,password);
+    // create user with token
+    const newUser = new User({
+      Name,
+      email,
+      password: hashedPassword,
+      verificationToken,    // ✅ store token
+    });
 
-//         //find the user by email
-//         const user = await User.findOne({email});
-//         if (!user){
-//             return res.status(401).json({message:"Invalid Credentials"})
+    const origin = "http://localhost:4000"; // frontend
+    const verifyEmail = `${origin}/user/verify-email?email=${email}&token=${verificationToken}`;
 
-//         }
+    // send verification email
+    await sendVerificationEmail({
+      Name: newUser.Name,
+      email: newUser.email,
+      verificationToken,
+      origin,
+    });
 
-//         const isPasswordValid = await bcrypt.compare(password, user.password)
-//         if (!isPasswordValid){
-//             return res.status(401).json ({message: "Invalid creentials"})
-//         }
-        
-        
-        
-        
-//         // generate token
-//         const token = jwt.sign({userId: user._id}, 'JQULYSXL12345', {
-//             expiresIn: "1h"
-//         })
+    await newUser.save();
+    res
+      .status(200)
+      .json({ message: "Signup successful! Check your email for verification." });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
 
-//         // return res.status(401).json ({message: "Login Successful" })
-//         return res.status(200).json({token})
+// export const verifyAccount = async (req, res) => {
 
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(500).json({message:"Server Error"})
-        
-        
-//     }
+//   const { verificationToken, email } = req.query;
+
+//   const user = await User.findOne({ email })
+
+//   if (!user) {
+//     return res.status(401).json({ msg: "Invalid credentials" });
+//   }
+
+//   if (!user.verificationToken || user.verificationToken !== verificationToken) {
+//     return res.status(401).json({ msg: "Invalid or expired token" });
+//   }
+//   user.isVerified = true;
+//   user.verified = Date.now()
+//   user.verificationToken = ''
+
+//   await user.save()
+
+//   res.status(StatusCodes.OK).json({ msg: 'success account verifield' })
+
 // }
+
+export const verifyAccount = async (req, res) => {
+  try {
+    const { email, token } = req.query;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ msg: "Invalid credentials" });
+    }
+
+    if (user.verificationToken !== token) {
+      return res.status(400).json({ msg: "Invalid token" });
+    }
+
+    user.isVerified = true;
+    user.verifiedAt = Date.now();
+    user.verificationToken = "";
+
+    await user.save();
+    res.status(200).json({ msg: "Email verified successfully" });
+  } catch (error) {
+    res.status(500).json({ msg: "Server error", error: error.message });
+  }
+};
+
+
+
 
 export const signin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("Received:", email, password);
 
-    // ✅ Static admin check
+    // ✅ Static admin login
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
       const token = jwt.sign(
         { role: "admin" },
-        "JQULYSXL12345",
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
       return res.status(200).json({
         message: "Admin login successful",
         token,
-        role: "admin"
+        role: "admin",
       });
     }
 
-    // ✅ DB user check
+    // ✅ Find user in DB
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Invalid Credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // ✅ Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid Credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { userId: user._id, role: "user" },
-      "JQULYSXL12345",
-      { expiresIn: "1h" }
-    );
+    // ✅ Check if email is verified
+    if (!user.isVerified) {
+      return res.status(400).json({ message: "Please verify your email first" });
+    }
 
-//     const token = jwt.sign(
-//   { userId: user.userId, role: "user" },
-//   "YOUR_SECRET_KEY",
-//   { expiresIn: "1h" }
-// );
+    // ✅ Create JWT
+    const tokenUser = { userId: user._id, email: user.email, name: user.Name };
+    const token = jwt.sign(tokenUser, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-
+    // ✅ Return only once
     return res.status(200).json({
       message: "User login successful",
       token,
-      userId: user._id,
-      name: user.Name, // ✅ fix: use username
-      email: user.email,
-      role: "user"
+      user: tokenUser,
+      role: "user",
     });
   } catch (error) {
     console.error(error);
@@ -140,7 +158,7 @@ export const signin = async (req, res) => {
 
 
 
-   export const fetchuser = async (req, res) => {
+export const fetchuser = async (req, res) => {
   try {
     let users = await User.find().select("Name email");
     return res.status(200).json({ users });

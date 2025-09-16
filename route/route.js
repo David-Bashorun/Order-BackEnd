@@ -1,5 +1,9 @@
 import express from "express";
 import multer from "multer";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
+import User from "../model/User.js";
 import { signup, signin } from "../controller/userController.js";
 import { fetchuser } from "../controller/userController.js";
 import { orderFood } from "../controller/orderController.js";
@@ -7,6 +11,7 @@ import { fetchorders } from "../controller/orderController.js";
 import authenticateToken from "../middleware/authenticateToken.js";
 import { updateOrderStatus } from "../controller/orderController.js";
 import { getMeals, createMeal, deleteMeal } from "../controller/mealController.js";
+import sendEmail from "../utils/sendEmail.js";
 
 
 
@@ -22,21 +27,48 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
-router.post("/signup", signup);
-router.post("/signin", signin);
-router.get("/fetchuser", authenticateToken, fetchuser);
-router.post("/orderfood", orderFood);
-router.get("/fetchorders", fetchorders);
-router.put("/order/:id", updateOrderStatus);
-
-router.get("/meals", getMeals);
-router.post("/meals", upload.single("image"), createMeal);
-router.delete("/meals/:id", deleteMeal);
-
-router.get("/private", authenticateToken, (req, res) => {
-  res.json({ message: "Private data", user: req.user });
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
 });
+
+
+
+
+
+// router.post("/signup", signup);
+// router.post("/signin", signin);
+// router.get("/fetchuser", authenticateToken, fetchuser);
+// router.post("/orderfood", orderFood);
+// router.get("/fetchorders", fetchorders);
+// router.put("/order/:id", updateOrderStatus);
+
+// router.get("/meals", getMeals);
+// router.post("/meals", upload.single("image"), createMeal);
+// router.delete("/meals/:id", deleteMeal);
+
+// router.get("/private", authenticateToken, (req, res) => {
+//   res.json({ message: "Private data", user: req.user });
+// });
+// router.get("/verify/:token", async (req, res) => {
+//     try {
+//         const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
+//         const user = await User.findById(decoded.id);
+
+//         if (!user) return res.status(400).json({ message: "Invalid token" });
+
+//         user.verified = true;
+//         await user.save();
+
+//         res.send("Email verified! You can now log in.");
+//     } catch (error) {
+//         res.status(400).json({ message: "Invalid or expired token" });
+//     }
+// });
+
 
 
 
