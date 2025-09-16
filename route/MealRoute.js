@@ -1,7 +1,6 @@
 import express from "express";
 import multer from "multer";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+
 import nodemailer from "nodemailer";
 import { getMeals, createMeal, deleteMeal } from "../controller/mealController.js";
 

@@ -1,7 +1,6 @@
 import express from "express";
 import multer from "multer";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+
 import nodemailer from "nodemailer";
 import { signup, signin } from "../controller/userController.js";
 import { fetchuser } from "../controller/userController.js";

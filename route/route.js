@@ -1,17 +1,9 @@
 import express from "express";
 import multer from "multer";
-import jwt from "jsonwebtoken";
+
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
-import User from "../model/User.js";
-import { signup, signin } from "../controller/userController.js";
-import { fetchuser } from "../controller/userController.js";
-import { orderFood } from "../controller/orderController.js";
-import { fetchorders } from "../controller/orderController.js";
-import authenticateToken from "../middleware/authenticateToken.js";
-import { updateOrderStatus } from "../controller/orderController.js";
-import { getMeals, createMeal, deleteMeal } from "../controller/mealController.js";
-import sendEmail from "../utils/sendEmail.js";
+
 
 
 

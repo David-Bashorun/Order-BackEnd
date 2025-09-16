@@ -1,8 +1,6 @@
 import express from "express";
 import multer from "multer";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
+
 import { orderFood } from "../controller/orderController.js";
 import { fetchorders } from "../controller/orderController.js";
 import { updateOrderStatus } from "../controller/orderController.js";

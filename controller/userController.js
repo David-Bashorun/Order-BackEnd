@@ -3,9 +3,9 @@
 import User from "../model/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import e from "express";
+
 import { v4 as uuidv4 } from "uuid";
-import sendEmail from "../utils/sendEmail.js";
+
 import sendVerificationEmail from "../utils/sendVerificationEmail.js";
 
 
