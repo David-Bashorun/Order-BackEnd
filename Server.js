@@ -2,11 +2,11 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import routes from "./route/route.js";
-import privroutes from "./route/PrivRoute.js";
-import userroutes from "./route/UserRoute.js";
-import orderroutes from "./route/OrderRoute.js";
-import mealroutes from "./route/MealRoute.js";
+import routes from "./src/route/route.js";
+import privroutes from "./src/route/PrivRoute.js";
+import userroutes from "./src/route/UserRoute.js";
+import orderroutes from "./src/route/OrderRoute.js";
+import mealroutes from "./src/route/MealRoute.js";
 import bodyParser from "body-parser";
 const app = express();
 
