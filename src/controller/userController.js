@@ -1,19 +1,5 @@
 //controller/usercontroller.mjs
 
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-// Get current file directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Build absolute path to User.js
-const userPath = join(__dirname, '../model/User.js');
-
-// Dynamically import
-const User = await import(userPath);
-
-
 import User from "../model/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
