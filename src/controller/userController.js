@@ -33,7 +33,7 @@ export const signup = async (req, res) => {
       verificationToken,    // ✅ store token
     });
 
-    const origin = "http://localhost:5173"; // frontend
+    const origin = "http://localhost:4000"; // frontend
     const verifyEmail = `${origin}/user/verify-email?email=${email}&token=${verificationToken}`;
 
     // send verification email
