@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 
 import nodemailer from "nodemailer";
-import { signup, signin } from "../controller/userController.js";
+import { signup , signin } from "../controller/userController.js";
 import { fetchuser } from "../controller/userController.js";
 import authenticateToken from "../middleware/authenticateToken.js";
 import {verifyAccount} from "../controller/userController.js";

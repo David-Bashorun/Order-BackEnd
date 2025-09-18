@@ -16,6 +16,13 @@ import mealroutes from "./route/MealRoute.js";
 
 const app = express();
 
+app.use(cors({
+  origin: "http://localhost:5173",  // your Vite frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
+
 // Set __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
